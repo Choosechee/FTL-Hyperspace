@@ -3597,9 +3597,9 @@ namespace _func258
 	static FunctionDefinition funcObj("CommandGui::RunCommand", typeid(void (CommandGui::*)(std::string &)), "5589e557565331db81ec8c0000008b750c", argdata, 2, 6, &func);
 }
 
-void CommandGui::RunCommand(std::string &command)
+void CommandGui::RunCommand(const std::string &command)
 {
-	typedef void __attribute__((cdecl)) (*custom_arg_funcptr_t)(CommandGui *this_arg, std::string &command_arg);
+	typedef void __attribute__((cdecl)) (*custom_arg_funcptr_t)(CommandGui *this_arg, const std::string &command_arg);
 	custom_arg_funcptr_t execfunc = (custom_arg_funcptr_t) _func258::func;
 	return execfunc(this, command);
 }
