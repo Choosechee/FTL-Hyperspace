@@ -3594,7 +3594,7 @@ namespace _func258
 {
 	static void *func = 0;
 	static short argdata[] = {0x1ff, 0x1ff};
-	static FunctionDefinition funcObj("CommandGui::RunCommand", typeid(void (CommandGui::*)(std::string &)), "5589e557565331db81ec8c0000008b750c", argdata, 2, 6, &func);
+	static FunctionDefinition funcObj("CommandGui::RunCommand", typeid(void (CommandGui::*)(const std::string &)), "5589e557565331db81ec8c0000008b750c", argdata, 2, 6, &func);
 }
 
 void CommandGui::RunCommand(const std::string &command)
