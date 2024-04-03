@@ -1158,3 +1158,11 @@ local _, canMove = crew.extend:CalculateStat(Hyperspace.CrewStat.CAN_MOVE)
 - `std::vector<std::string>` `.hitShieldSounds`
 - `std::vector<std::string>` `.missSounds`
 - `string` `.image`
+
+## CustomAugmentManager
+
+### Methods
+- `CustomAugmentManager .GetInstance()`
+   - Returns the main instance of `CustomAugmentManager`. Always use this to access any members belonging to this class.
+- `bool :IsAugment(const std::string& name)`
+- `std::unordered_map<std::string, int>* :GetShipAugments(int iShipId);`
