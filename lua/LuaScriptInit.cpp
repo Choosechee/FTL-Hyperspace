@@ -86,21 +86,6 @@ void removeDangerousStuff(lua_State* lua)
     lua_pushnil(lua);
     lua_setglobal(lua, "rawset");
     
-    lua_newtable(lua);
-    lua_getglobal(lua, "os");
-    lua_getfield(lua, -1, "clock");
-    lua_setfield(lua, -3, "clock");
-    lua_getfield(lua, -1, "date");
-    lua_setfield(lua, -3, "date");
-    lua_getfield(lua, -1, "difftime");
-    lua_setfield(lua, -3, "difftime");
-    lua_getfield(lua, -1, "time");
-    lua_setfield(lua, -3, "time");
-    lua_pop(lua, -1); // remove os table from stack
-    lua_setglobal(lua, "time"); 
-    lua_pushnil(lua);
-    lua_setglobal(lua, "os");
-    
     lua_getglobal(lua, "math");
     lua_pushcfunction(lua, math_random);
     lua_setfield(lua, -2, "random");

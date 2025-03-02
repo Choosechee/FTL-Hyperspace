@@ -31,6 +31,18 @@
 #include "CustomDamage.h"
 %}
 
+//REMOVE DANGEROUS STUFF 2: ELECTRIC BOOGALOO
+//(but place the time functions from os into a new time global table)
+%luacode {
+    time = {}
+	time.clock = os.clock
+	time.date = os.date
+	time.difftime = os.difftime
+	time.time = os.time
+	
+	os = nil
+}
+
 %feature("flatnested");
 //New method of dealing with polymorphic/dynamic types using SWIG's inheritence system and typemaps
 //For example, the std::vector<SpaceDrone*> indexing method returns a SpaceDrone*, which may be a pointer to a subclass of SpaceDrone
