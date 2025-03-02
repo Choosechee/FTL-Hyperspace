@@ -35,12 +35,12 @@
 //(but place the time functions from os into a new time global table)
 %luacode {
     time = {}
-	time.clock = os.clock
-	time.date = os.date
-	time.difftime = os.difftime
-	time.time = os.time
-	
-	os = nil
+    time.clock = os.clock
+    time.date = os.date
+    time.difftime = os.difftime
+    time.time = os.time
+    
+    os = nil
 }
 
 %feature("flatnested");
