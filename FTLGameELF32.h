@@ -7153,6 +7153,7 @@ struct ShipManager : ShipObject
 	bool DummyOxygenInstalled();
 	
 	void RemoveSystem(int systemId);
+	void RemoveSystem(ShipSystem *system);
 
 	int SystemWillReplace(int systemId);
 

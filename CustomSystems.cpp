@@ -7,6 +7,7 @@
 #include "SystemBox_Extend.h"
 #include <boost/lexical_cast.hpp>
 
+#include <algorithm>
 #include <cmath>
 
 void ParseSystemsNode(rapidxml::xml_node<char>* node)
@@ -1760,49 +1761,63 @@ void ShipManager::RemoveSystem(int iSystemId)
 {
     if (HasSystem(iSystemId) && iSystemId != SYS_REACTOR && iSystemId != SYS_INVALID)
     {
-        //Remove base ShipSystem
-        ShipSystem* removeSys = GetSystem(iSystemId);
         while (HasSystem(iSystemId)) //Repeat removal for artillery systems
         {
-            int systemRoom = GetSystemRoom(iSystemId);
-            ship.EmptySlots(systemRoom);
-            for (CrewMember* crew : vCrewList)
-            {
-                if (crew->currentSlot.roomId == systemRoom)
-                {
-                    crew->EmptySlot();
-                    crew->SetRoom(systemRoom);
-                    crew->SetCurrentSystem(nullptr);
-                    crew->StopRepairing();
-                }
-            }
-            ShipSystem* specificSys = GetSystem(iSystemId);      
-            if (specificSys->bNeedsPower)
-            {
-                while (specificSys->RawDecreasePower()) continue;
-            }
-            
-            vSystemList.erase(vSystemList.begin() + systemKey[iSystemId]);
-            systemKey[iSystemId] = -1;
-            for (int idx = 0; idx < vSystemList.size(); ++idx)
-            {
-                ShipSystem* sys = vSystemList[idx];
-                systemKey[sys->iSystemType] = idx;
-            }
-            RemoveEquipment(ShipSystem::SystemIdToName(iSystemId), true);
+            ShipSystem* removeSys = GetSystem(iSystemId);
+            RemoveSystem(removeSys);
+        }
+    }
+}
 
-            if (current_target && current_target->hackingSystem != nullptr)
+void ShipManager::RemoveSystem(ShipSystem *system)
+{
+    int iSystemId = system->GetId();
+    if (system->_shipObj.iShipId == iShipId && iSystemId != SYS_REACTOR && iSystemId != SYS_INVALID)
+    {
+        //Remove base ShipSystem
+        int systemRoom = system->roomId;
+        ship.EmptySlots(systemRoom);
+        for (CrewMember* crew : vCrewList)
+        {
+            if (crew->currentSlot.roomId == systemRoom)
             {
-                if (current_target->hackingSystem->queuedSystem == specificSys)
-                {
-                    current_target->hackingSystem->queuedSystem = nullptr;
-                }
-                if (current_target->hackingSystem->currentSystem == specificSys)
-                {
-                    current_target->hackingSystem->currentSystem = nullptr;
-                }
+                crew->EmptySlot();
+                crew->SetRoom(systemRoom);
+                crew->SetCurrentSystem(nullptr);
+                crew->StopRepairing();
             }
         }
+        
+        if (system->bNeedsPower)
+        {
+            while (system->RawDecreasePower()) continue;
+        }
+        
+        vSystemList.erase(std::remove(vSystemList.begin(), vSystemList.end(), system), vSystemList.end());
+
+        if (iSystemId != SYS_ARTILLERY || artillerySystems.size() <= 1)
+        {
+            systemKey[iSystemId] = -1;
+            RemoveEquipment(ShipSystem::SystemIdToName(iSystemId), true);
+        }
+        for (int idx = 0; idx < vSystemList.size(); ++idx)
+        {
+            ShipSystem* sys = vSystemList[idx];
+            systemKey[sys->iSystemType] = idx;
+        }
+
+        if (current_target && current_target->hackingSystem != nullptr)
+        {
+            if (current_target->hackingSystem->queuedSystem == system)
+            {
+                current_target->hackingSystem->queuedSystem = nullptr;
+            }
+            if (current_target->hackingSystem->currentSystem == system)
+            {
+                current_target->hackingSystem->currentSystem = nullptr;
+            }
+        }
+
         CommandGui* gui = G_->GetCApp()->gui;
         ShipBuilder& shipBuilder = G_->GetCApp()->menu.shipBuilder;
         //Special handling per system for derived classes
@@ -1894,20 +1909,20 @@ void ShipManager::RemoveSystem(int iSystemId)
             };     
             case SYS_PILOT: 
             {
-                delete removeSys;
-                removeSys = nullptr;
+                delete system;
+                system = nullptr;
                 break;
             };      
             case SYS_SENSORS: 
             {
-                delete removeSys;
-                removeSys = nullptr;
+                delete system;
+                system = nullptr;
                 break;
             };      
             case SYS_DOORS: 
             {
-                delete removeSys;
-                removeSys = nullptr;
+                delete system;
+                system = nullptr;
                 break;
             };         
             case SYS_TELEPORTER: 
@@ -1930,11 +1945,8 @@ void ShipManager::RemoveSystem(int iSystemId)
             case SYS_ARTILLERY: 
             {
                 if (!shipBuilder.bOpen) gui->combatControl.DisarmAll();
-                for (ArtillerySystem* artillery : artillerySystems)
-                {
-                    delete artillery;
-                }
-                artillerySystems.clear();
+                delete ((ArtillerySystem*)system);
+                artillerySystems.erase(std::remove(artillerySystems.begin(), artillerySystems.end(), system), artillerySystems.end());
 
                 break;
             };  
@@ -1978,15 +1990,15 @@ void ShipManager::RemoveSystem(int iSystemId)
             case SYS_TEMPORAL: 
             {
                 if (!shipBuilder.bOpen) gui->combatControl.DisarmAll();
-                SYS_EX(removeSys)->temporalSystem->StopTimeDilation();
-                delete removeSys;
-                removeSys = nullptr;
+                SYS_EX(system)->temporalSystem->StopTimeDilation();
+                delete system;
+                system = nullptr;
                 break;
             };  
             default:
             {
-                delete removeSys;
-                removeSys = nullptr;
+                delete system;
+                system = nullptr;
                 break;
             };   
         }
